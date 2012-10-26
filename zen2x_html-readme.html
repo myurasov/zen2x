@@ -1,0 +1,483 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ru">
+<head>
+  <title>Zen 2x HTML</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <script type="text/javascript" src="zen2x.js"></script>
+  <style type="text/css">
+    
+    body, h1, h2, h3, h4, ul, li
+    {
+      font-family: Georgia, serif;
+      font-size: 12pt;
+    }
+
+    .result {
+      display: none;
+    }
+    
+    .comment {
+      color: green;
+      font-family: "Courier New", monospace;
+    }
+    
+    code {
+      background-color: #E8F4FF;
+      font-family: "Courier New", monospace;
+      font-size: 11pt;
+      letter-spacing: 1px;
+    }
+    
+    code b {
+      background-color: #C4E4FF;
+    }
+    
+    pre {
+      background-color: #F8F8F8;
+      font-family: "Courier New";
+      font-size: 11pt;
+      padding: 10px;
+    }
+    
+    body {
+     padding-left: 75px;
+    }
+    
+    h1 {
+      margin-left: -50px;
+    }
+    
+    h2 {
+      margin-left: -40px;
+    }
+    
+    h3 {
+      margin-left: -30px;
+    }
+
+    h4 {
+      margin-left: -20px;
+    }
+    
+    #btnGo {
+      cursor: pointer;
+    }
+
+    #download {
+      background-color: #ffffde;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 5px;
+      opacity: 0.75;
+    }
+
+    #download:hover
+    {
+      opacity: 1;
+    }
+  </style>
+  <script type="text/javascript">
+    function expand_code(n, o)
+    {
+      o = o || {};
+      
+      var c = document.getElementById("code_" + n.toString());
+      var e = document.getElementById("expand_" + n.toString());
+      var r = document.getElementById("result_" + n.toString());
+
+      if (r.innerHTML == "")
+      {
+        zen2x.html.generator.config.xhtml_mode = o.mode != "html";
+        var code = c.innerHTML.replace(/\<.+?\>/g, "").replace(/&gt;/g, ">");
+        code = zen2x.html.parser.parse(code);
+        zen2x.html.generator.config.tab = "&nbsp;";
+        zen2x.html.generator.config.newline = "\n";
+        code = zen2x.html.generator.generate(code, 0, false);
+        code = code.replace(/\</g, "&lt;").replace(/\>/g, "&gt;").replace(/\n/g, "<br>");
+        r.innerHTML = code;
+      }
+
+      if (e.innerHTML == "+")
+      {
+        e.innerHTML = "-";
+        r.style.display = "block"
+      }
+      else
+      {
+        e.innerHTML = "+";
+        r.style.display = "none"
+      }
+    }
+  
+    function go()
+    {
+      var e = document.getElementById("txtExpr");
+      var o1 = document.getElementById("optMode1");
+      var r = document.getElementById("txtRes");
+      
+      var code = e.value;
+      
+      zen2x.html.generator.config.xhtml_mode = o1.checked === true;
+      zen2x.html.generator.config.tab = " ";
+      zen2x.html.generator.config.newline = "\n";
+      
+      // Parse expression
+      if ((code = zen2x.html.parser.parse(code)) === false)
+      {
+        alert("Parsing error:\n" + zen2x.html.parser.error);
+      }      
+      // Create HTML code
+      else if ((code = zen2x.html.generator.generate(code, 0, false)) === false)
+      {
+        alert("Code generation error:\n" + zen2x.html.generator.error);
+      }
+      // OK
+      else
+      {
+        r.value = code;
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="download">
+    <a href="zen2x.js">zen2x.js</a><br>
+    <a href="zen2x-ue.js">zen2x-ue.js</a>
+  </div>
+  <h1>Zen 2x HTML, версия 1.0</h1>
+  <p>
+    Руководство по использованию <b>Zen 2x HTML</b> JavaScript движка.
+  </p>
+  <h2>Содержание</h2>
+  <p>
+    <ul>
+      <li>
+         <a href="#what">Что такое Zen 2x HTML?</a>
+      </li>
+      <li>
+        <a href="#caps">Возможности</a>
+        <ul>
+          <li><a href="#caps-base">Базовые возможности Zen 2x HTML</a></li>
+          <li><a href="#caps-ext">Расширенные возможности</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#demo">Демонстрация</a>
+      </li>
+      <li>
+        <a href="#use">Использование</a>
+        <ul>
+          <li>
+            <a href="#use-js">Использование JavaScript движка</a>
+          </li>
+          <li>
+            <a href="#use-ue">Использование совместно с UltraEdit/UEStudio</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#compat">Совместимость</a>
+      </li>
+      <li>
+        <a href="#plans">План развития</a>
+      </li>
+      <li>
+        <a href="#vh">Истоия версий</a>
+      </li>
+      <li>
+        <a href="#lic">Лицензия</a>
+      </li>
+    </ul>
+  </p>
+  
+  <a name="what"></a>
+  <h2>Что такое Zen 2x HTML?</h2>
+  <p>
+     Zen 2x - это
+  расширенная реализация <a href="http://pepelsbey.net/2009/04/zen-coding-
+  concept/">Zen Coding 2.0 Concept</a> в виде универсального движка на
+  JavaScript. Цель создания - упростить адаптацию концепции к максимально
+  возможному числу редакторов кода. На данный момент реализована часть,
+  отвечающая за HTML/XHTML код, в ближайшем будущем будет релизована CSS-часть.
+  
+  </p>
+  <p>
+    Библиолтека выполняет все функции, описанные в концепции, а
+  также поддерживает:
+    <ul>
+      <li>
+        Скобоки для группировки
+  выражений. Таким образом, с помощью zen-аббревитауры можно составить любое
+  HTML-дерево. Например: <code id="code_6">p&gt;<b>(</b>ul&gt;li*2<b>)</b>+a</code>&nbsp;<a href="javascript:expand_code(6)" id="expand_6">+</a>.
+        <pre id="result_6" class="result"></pre>
+      </li>
+      <li>
+  
+  Произвольные аттрибуты. Вы можете указывать для элемента любой аттрибут.
+  Например: <code id="code_5">table<b>[border=0]</b>&gt;tr*3&gt;td<b>[width=50%][nowrap]</b>*2</code>&nbsp;<a href="javascript:expand_code(5)" id="expand_5">+</a>.
+  
+  <pre id="result_5" class="result"></pre>
+      </li>
+      <li>
+  
+  Счетчики в атрибутах. Например: <code id="code_4">ul&gt;li.item_<b>$</b>*5</code>&nbsp;<a href="javascript:expand_code(4)" id="expand_4">+</a>.
+        <pre id="result_4" class="result"></pre>
+      </li>
+    </ul>
+  </p>
+  
+  <p>
+  
+  Парсинг аббревиатур и генерация HTML/XHTML кода полностью разделены. Таким
+  образом, адаптация библиотеки под конкретные нужды предельно упрощена. Каждый
+  компонент конфигурируется и используется независимо друг от друга.
+  </p>
+  
+  
+  <p>
+    Генератор кода, реализованный на данный момент поддерживает
+  форматирование согласно выбранному типу документа (HTML/XHTML); настраиваемые
+  отступы кода; настройку представления элементов (в одну строку или блоком);
+  автоматическое размещения курсора, в том числе с добалением пустой строки если
+  неоходимо и многие другие удобные функции.
+  </p>
+  
+  <a name="caps"></a>
+  
+  <h2>Возможности</h2>
+  
+  <a name="caps-base"></a>
+  <h3>Базовые возможности Zen 2x HTML</h3>
+  <p>
+    Zen 2x HTML позволяет создавать HTML/XHTML-разметку с помощью простых и эффективных выражений в стиле CSS3-query. Например, код <code id="code_0">ul&gt;li*3&gt;a.cls+img</code> будет преобразован в следующий код:&nbsp;<a href="javascript:expand_code(0)" id="expand_0">+</a>
+    <pre id="result_0" class="result"></pre>
+  </p>
+  <p>
+    Поддерживаются все стандартные возможномсти <a href="http://pepelsbey.net/2009/04/zen-coding-concept/">Zen Coding 2.0 HTML</a>.
+  </p>
+  
+  <a name="caps-ext"></a>
+  <h3>Расширенные возможности</h3>
+  
+  <h4>Группировка с помощью скобок</h4>
+  <p>
+    С помощь скобок Zen 2x выражение может представлять HTML-дерево любой степени вложенности. Использование скобок аналогично их применению в арифметических выражениях. После скобки может стоять знак <code>*</code> и цифра, указывающая на количество повторений, например <code>(a+img)*5</code>.
+  </p>
+  <p>
+    Несколько примеров:
+    <ul>
+      <li>
+        <code id="code_1">html&gt;<b>(</b>head&gt;script+link<b>)</b>+<b>(</b>body&gt;<b>(</b>h1+p.cls&gt;img[border=0]+a+a[!href]<b>)</b>*2<b>)</b></code>&nbsp;<a href="javascript:expand_code(1)" id="expand_1">+</a>
+        <pre id="result_1" class="result"></pre>
+      </li>
+      <li>
+        <code id="code_2">div&gt;<b>(</b>ul&gt;li*2&gt;a<b>)</b>+img</code>&nbsp;<a href="javascript:expand_code(2)" id="expand_2">+</a>
+        <pre id="result_2" class="result"></pre>
+      </li>
+      <li>
+        <code id="code_3">h1+<b>(</b>p&gt;img+cite<b>)</b>+h2+<b>(</b>p&gt;pre<b>)</b>+$0*2</code>&nbsp;<a href="javascript:expand_code(3)" id="expand_3">+</a>
+        <pre id="result_3" class="result"></pre>
+      </li>
+      <li>
+        <code id="code_7">p&gt;ul&gt;li*3&gt;<b>(</b>code#code_$+a#expand_$+pre#result_$.result<b>)</b></code>&nbsp;<a href="javascript:expand_code(7)" id="expand_7">+</a>
+        <pre id="result_7" class="result"></pre>
+      </li>
+    </ul>
+  </p>
+  
+  <h4>Произвольные аттрибуты</h4>
+  <p>
+    Zen 2x HTML позволяет указать любые аттрибуты для элемента, а таже отменить аттрибуты, присвоенные по-умолчанию. Аттрибуты автоматически форматируются, согласно текущим настройкам: расстановляются кавычки; в режиме XHTML-документа имена приводятся к нижнему регистру, булевы аттрибуты нормализуются (напр. <code>td[nowrap]</code> трансформируется в <code>&lt;td nowrap="nowrap"&gt&lt;/td&gt;</code>). Также можно отменить ранее присвоенный (например, по-умолчанию) аттрибут, поставив восклицательный знак перед именем аттрибута: <code>a[!href]</code> даст код <code>&lt;a&gt;&lt/a&gt;</code>.
+  </p>
+    <ul>
+      <li>
+        <code id="code_8">img.abc<b>[!class]</b>.def</code>
+        <a href="javascript:expand_code(8)" id="expand_8">+</a>
+        <pre id="result_8" class="result"></pre>
+      </li>
+      <li>
+        <code id="code_9">img<b>[!alt]</b></code>
+        <a href="javascript:expand_code(9)" id="expand_9">+</a>
+        <pre id="result_9" class="result"></pre>
+      </li>
+      <li>
+        <code id="code_10">img<b>[border=1]</b><b>[</b>!alt<b>]</b></code>
+        <a href="javascript:expand_code(10)" id="expand_10">+</a>
+        <pre id="result_10" class="result"></pre>
+      </li>
+      <li>
+        <code id="code_11">td<b>[nowrap]</b></code> <i>(режим XHTML)</i>
+        <a href="javascript:expand_code(11)" id="expand_11">+</a>
+        <pre id="result_11" class="result"></pre>
+      </li>
+      <li>
+        <code id="code_12">td<b>[nowrap]</b></code> <i>(режим HTML)</i>
+        <a href="javascript:expand_code(12, {mode:'html'})" id="expand_12">+</a>
+        <pre id="result_12" class="result"></pre>
+      </li>
+    </ul>
+    
+    <h4>Счетчики</h4>
+    <p>
+      В классах, ID и аттрибутах <code>$</code> будет заменен на счетчик. Используйте <code>$$</code> для получения знака <code>$</code>. Примеры:
+    </p>
+    <ul>
+      <li>
+        <code id="code_13">ul&gt;li#id_<b>$</b>*5</code>
+        <a href="javascript:expand_code(13)" id="expand_13">+</a>
+        <pre id="result_13" class="result"></pre>      
+      </li>
+      <li>
+        <code id="code_14">a#link_<b>$</b>[href=$$<b>$</b>]*10</code>
+        <a href="javascript:expand_code(14)" id="expand_14">+</a>
+        <pre id="result_14" class="result"></pre>      
+      </li>
+    </ul>
+    
+    <a name="demo"></a>
+    <h2>Демонстрация</h2>
+    
+    <table border="0" cellpadding="5" cellspacing="0" width="75%" align="center">
+      <tr>
+        <td width="10%" nowrap>
+          Выражение
+        </td>
+        <td>
+          <input type="text" name="txtExpr" id="txtExpr" style="width: 100%" value="dl+">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Опции
+        </td>
+        <td>
+          <input type="radio" name="optMode" id="optMode1" checked>&nbsp;<label for="optMode1">XHTML</label>
+          <input type="radio" name="optMode" id="optMode2">&nbsp;<label for="optMode2">HTML</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Результат
+        </td>
+        <td>
+          <textarea name="txtRes" id="txtRes" cols="30" rows="20" style="width: 100%"></textarea>
+        </td>
+      </tr>    
+      <tr>
+        <td colspan="2" align="center">
+          <input type="submit" name="btnGo" id="btnGo" value="Go &#187;" onclick="go(); return false;">
+        </td>
+      </tr>
+    </table>
+    
+    <a name="use"></a>
+    <h2>Использование</h2>
+    
+    <a name="use-js"></a>
+    <h3>Использование JavaScript-движка</h3>
+    <p>Zen2x HTML структурно разделен на две части: <em>parser</em> и <em>generator</em>. <em>Parser</em> служит для преобразования исходной аббревиатуры в структурированный объект-дерево. <em>Generator</em> берет этот объект и генерирует на его основе и согласно пользовательским настройкам HTML/XHTML-код. Каждый этап независим друг от друга и может сообщать об ошибках, возникших в процессе работы.</p>
+    
+    <p>Пример использования:
+    <pre>
+var abbr = "a+img"; <span class="comment">// Аббревиатура</span>
+
+zen2x.html.generator.config.xhtml_mode = true; <span class="comment">// Выбора режима XHMTL/HTML</span>
+var tree = zen2x.html.parser.parse(abbr); <span class="comment">// Парсинг аббревиатуры</span>
+
+if (tree !== false)
+{
+  zen2x.html.generator.config.tab = "  "; <span class="comment">// Пробелы в качестве табуляции</span>
+  zen2x.html.generator.config.newline = "\n"; <span class="comment">// Символ переноса строки</span>
+  var code = zen2x.html.generator.generate(tree, 0, false); <span class="comment">// Генерация кода</span>
+
+  if (code !== false)
+  {
+    <span class="comment">// Вывод сгенерированного кода</span>
+    alert(code);
+  }
+  else
+  {
+    <span class="comment">// Ошибка генератора</span>
+    alert("Generator error:\n" + zen2x.html.generator.error);
+  }
+}
+else
+{
+  <span class="comment">// Ошибка парсинга</span>
+  alert("Parser error:\n" + zen2x.html.parser.error);
+}
+    </pre></p>
+    
+    <p>Функция <code>zen2x.html.parser.parse(expression)</code> принимает единственный параметр <code>expression</code> - строку, содержащую Zen2x HTML </p>
+    
+    <p>Функция <code>zen2x.html.generator.generate(tree, indent, place_cursor)</code> принимает три параметра: 
+    
+    <ul>
+      <li>
+        <code>tree</code> - дерево элементов, волученное в результате парсинга аббревиатуры
+      </li>
+      <li>
+        <code>indent</code> - (целое число) количество отступов, которое неоходимо вставить перед кодом. Может быть как положительным так и отрицательным числом. По умолчанию - 0.
+      </li>
+      <li>
+        <code>place_cursor</code> - (логическое значение) помещать ли в позицию, удобную для редактирования дополнительную пустую строку (если необходимо) и вычислять ли новую позицию курсора в текстовом редакторе. В случае, если этот параметр имеет значение <code>true</code>, объект <code>zen2x.html.generator.selection</code> содержит позицию курсора и выделения в сгенерированном тексте. Он имеет следующую структуру: <code>{start : {line, col}, end : {line, col}}</code>. Эти данные используются для того, чтобы переместить курсор на новую позицию редактирования. Курсор автоматически помещается на дополнительную пустую строку внутри блочных тегов, в аттрибуты и пустые теги. Аттрибуты, установленные по-умолчанию выделяются целиком для возможности быстрой замены. По умолчанию, параметр <code>place_cursor</code> равен <code>false</code>.
+      </li>
+    </ul>
+      
+    В случае успеха, функция возвращает строковое значение - сгенерированный код. В случает ошибки - <code>false</code>. Текстовое описание последней ошибки содержится в переменной <code>zen2x.html.generator.error</code>.
+    </p>
+    
+    <p>Более подробно о возможностях конфигурирования можно узнать из комментариев в исходном коде.</p>
+      
+    <a name="use-ue"></a>
+    <h2>Использование совместно с UltraEdit/UEStudio</h2>
+    
+    <p>
+      Для подключения Zen2x HTML к UltraEdit/UEStudio необходимо:
+      <ol>
+        <li>Вызвав диалог из меню <em>Scripting/Scripts...</em>, добавить файл <em>zen2x-ue.js</em></li>
+        <li>Там же &#151; назначить на вызов этого скрипта хоткей, например <em>Ctrl+=</em>. Если вы хотите использовать таб, то в скрипте надо раскомментировать следующую строку <pre class="comment">// this.is_hotkey_tab = true;</pre></li>
+      </ol>
+    </p>
+    
+    <p>Для преобразования всей текущей строки необходимо не выделяя её нажать хоткей. Курсор будет установлен в наиболее удобную позицию для последующего редактирования. Первый аттрибут по-умолчанию будет также выделен.</p>
+
+    <p>Для вставки кода в текст, выделите фрагмент, который неоходимо преобразовать, он будут заменен на сгенерированный текст. Выделение и курсор также автоматически будут перемещены в наиболее удобную позицию для дальнейшего редактирования.</p>
+
+  <p>Ошибки выводятся в окно вывода редактора.</p>
+    
+    <a name="compat"></a>
+    <h2>Совместимость</h2>
+    
+    <p>Zen2x HTML совместим со стандартными реализациями JavaScript и в теории должен работать везде. ;)</p>
+    <p>Версия для UltraEdit/UEStudio тестировалась на UEStudio'06 и UEStudio'09. В теории, также должна работать на всех версиях, где есть JavaScript-скриптование.</p>
+    
+    <a name="plans"></a>
+    <h2>План развития</h2>
+    
+    <p>В ближайщем будущем планируется реализовать Zen Coding 2.0 CSS.</p>
+    
+    <a name="vh"></a>
+    <h2>История версий</h2>
+    
+    <p>
+      <ul>
+        <li>
+          <b>1.0</b> (09 ноября 2009 г.) - первая публичная версия.
+        </li>
+      </ul>
+    </p>
+
+    <a name="lic"></a>
+    <h2>Лицензия</h2>
+
+    <p>Исходный код Zen2x HTML можно использовать как угодно в каких угодно целях, упоминая при этом автора(ов).</p>
+
+    <a name="contacts"></a>
+    <h2>Контакты</h2>
+    
+    <p>Михаил Юрасов &lt;me!sobaka!yurasov.me&gt;</p>
+    
+  </body>
+</html>
